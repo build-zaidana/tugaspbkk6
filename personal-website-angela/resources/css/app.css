@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+    --color-bg-start: #f6d9e7;
+    --color-bg-mid: #dd8fbb;
+    --color-bg-end: #7a4c85;
+    --color-frame: #7a3b47;
+    --color-pink: #ec4899;
+    --color-pink-dark: #be185d;
+    --color-cream: #fdf2f7;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(160deg, var(--color-bg-start), var(--color-bg-mid) 55%, var(--color-bg-end));
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: #4a1f2e;
+}
+
+.font-script {
+    font-family: 'Great Vibes', cursive;
+}
+
+.font-tech {
+    font-family: 'Space Mono', monospace;
+}
+
+/* Komponen "retro OS window" — dipakai berulang di berbagai section */
+.window-card {
+    background: var(--color-cream);
+    border: 2px solid var(--color-frame);
+    border-radius: 0.75rem;
+    box-shadow: 3px 3px 0 rgba(122, 59, 71, 0.3);
+    overflow: hidden;
+}
+
+.window-titlebar {
+    background: linear-gradient(90deg, #f9a8d4, #ec4899);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.85rem;
+    border-bottom: 2px solid var(--color-frame);
+}
+
+.window-titlebar .dot {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 9999px;
+    display: inline-block;
+}
+
+/* Underline animasi untuk link navbar */
+.nav-link {
+    position: relative;
+    padding-bottom: 2px;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 0;
+    height: 2px;
+    background: currentColor;
+    transition: width 0.25s ease;
+}
+
+.nav-link:hover::after,
+.nav-link.is-active::after {
+    width: 100%;
+}
+
+/* Scroll-reveal: elemen mulai transparan+turun, JS toggle .reveal-visible saat masuk viewport */
+.reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Kartu hover: naik dikit + shadow lebih tegas, halus */
+.hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 5px 5px 0 rgba(122, 59, 71, 0.35);
+}
+
+/* Bintang dekoratif kecil yang mengambang pelan — dipakai tipis-tipis, jangan berlebihan */
+@keyframes float-soft {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-6px) rotate(6deg); }
+}
+
+.float-soft {
+    animation: float-soft 5s ease-in-out infinite;
+}
+
+@keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+    animation: fade-in-up 0.5s ease both;
+}
