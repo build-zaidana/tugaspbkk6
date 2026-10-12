@@ -47,6 +47,26 @@
             @endif
         </div>
 
+        <div>
+            @php($identifierField = $user->academicIdentifierField())
+            <x-input-label :for="$identifierField" :value="strtoupper($identifierField)" />
+            <x-text-input :id="$identifierField" :name="$identifierField" type="text" inputmode="numeric" class="mt-1 block w-full" :value="old($identifierField, $user->{$identifierField})" minlength="10" maxlength="20" aria-describedby="identifier-help" />
+            <p id="identifier-help" class="mt-1 text-sm text-gray-600">Opsional, 10–20 digit angka.</p>
+            <x-input-error class="mt-2" :messages="$errors->get($identifierField)" />
+        </div>
+
+        <div>
+            <x-input-label for="department" value="Departemen" />
+            <x-text-input id="department" name="department" type="text" class="mt-1 block w-full" :value="old('department', $user->department)" required maxlength="150" />
+            <x-input-error class="mt-2" :messages="$errors->get('department')" />
+        </div>
+
+        <div>
+            <x-input-label for="bio" value="Tentang saya" />
+            <textarea id="bio" name="bio" rows="4" maxlength="2000" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('bio', $user->bio) }}</textarea>
+            <x-input-error class="mt-2" :messages="$errors->get('bio')" />
+        </div>
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

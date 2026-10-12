@@ -19,6 +19,8 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
-        return view('dashboard', compact('user', 'projects'));
+        $courseTasks = $user->courseTasks()->orderByDesc('tanggal_pengumpulan')->latest()->get();
+
+        return view('dashboard', compact('user', 'projects', 'courseTasks'));
     }
 }

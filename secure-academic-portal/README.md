@@ -6,7 +6,7 @@ proposal proyek Agentic AI.
 
 ## Cara Menjalankan
 
-Kebutuhan: PHP 8.3+, Composer, Node.js 20+, MySQL (atau SQLite).
+Kebutuhan: PHP 8.3+, Composer, Node.js 20+, dan MySQL. Database aplikasi memakai MySQL sesuai tugas pertemuan 6; SQLite hanya digunakan untuk pengujian otomatis secara default.
 
 ```bash
 composer install
@@ -22,10 +22,23 @@ php artisan migrate --seed
 php artisan serve
 ```
 
-Ingin cepat tanpa MySQL? Ubah `.env` menjadi `DB_CONNECTION=sqlite`, hapus baris `DB_HOST` s.d. `DB_PASSWORD`,
-jalankan `touch database/database.sqlite`, lalu `php artisan migrate --seed`.
+Atur `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD` di `.env` sesuai server MySQL lokal. Nama database bawaan adalah `secure_academic_portal`; buat dengan `CREATE DATABASE secure_academic_portal CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`. Jangan sertakan `.env` dalam Git.
+
+Pada workspace Windows ini, instance MySQL khusus proyek menggunakan port **3307** dan data di `../../.runtime/mysql-pbkk6/data`; konfigurasi aktif tersimpan di `.env`. PHP portable berada di `../../.runtime/php84`. Untuk menyalakan kembali MySQL dan aplikasi, jalankan dari folder proyek:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\start-local.ps1
+```
+
+Halaman aplikasi tersedia di `http://localhost:8000`. Pada komputer lain, gunakan server MySQL sendiri dan sesuaikan `.env`, lalu jalankan `php artisan serve`.
 
 Reset data demo kapan saja: `php artisan migrate:fresh --seed`. Jalankan pengujian: `php artisan test`.
+
+Profil (`nrp`, `nip`, `department`, `bio`), proposal, dan riwayat tugas sekarang disimpan di database. Dosen memakai NIP, sedangkan mahasiswa dan asdos memakai NRP; kedua nomor disimpan pada kolom terpisah dan unik. Profil dapat disunting melalui `/profile`; riwayat tugas dapat ditambah dan dihapus melalui `/dashboard`. Halaman publik menampilkan akun `PORTFOLIO_PUBLIC_EMAIL` (bawaan `mahasiswa@student.its.ac.id`); pengguna yang login melihat portofolionya sendiri. API key tidak ditampilkan pada halaman publik.
+
+Untuk database lama, jalankan `php artisan migrate`, lalu `php artisan db:seed --class=PortfolioSeeder` untuk melengkapi data portofolio demo tanpa menghapus proposal yang ada. Seeder ini dapat dijalankan ulang tanpa menggandakan riwayat tugas bawaan.
+
+Format PHP menggunakan PSR-12 melalui `pint.json`. Jalankan `vendor/bin/pint` untuk merapikan kode atau `vendor/bin/pint --test` untuk memeriksa format. Pengujian pada MySQL harus memakai database khusus pengujian, bukan `secure_academic_portal`, karena suite menggunakan `RefreshDatabase`.
 
 ## Akun Demo (password semua: `password`)
 
@@ -74,5 +87,7 @@ halaman login menampilkan tombol **Login sebagai Dosen / Asdos / Mahasiswa** (ta
 | `ProjectFactory` realistis | `database/factories/ProjectFactory.php` |
 | 15 mahasiswa × 2 project + akun `dosenpbkk@its.ac.id` | `database/seeders/DatabaseSeeder.php` |
 | Query dashboard hanya project milik user login, terbaru dulu | `app/Http/Controllers/DashboardController.php` → `$user->projects()->latest()->get()` |
+
+Profil dinamis ditambahkan lewat migration `add_portfolio_fields_to_users_table`. Riwayat tugas memakai model `CourseTask` dan tabel `course_tasks` dengan FK cascade ke pengguna. Keduanya diuji pada `PortfolioTest` dan `CourseTaskTest`.
 
 Semua aturan di atas diuji di `tests/Feature/SecurePortalTest.php`.

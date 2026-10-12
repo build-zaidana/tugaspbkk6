@@ -12,12 +12,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 // 'role' sengaja tidak fillable agar user tidak bisa menaikkan perannya sendiri.
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'nrp', 'nip', 'department', 'bio'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory;
+    use Notifiable;
 
     public const ROLE_DOSEN = 'dosen';
 
@@ -46,8 +47,19 @@ class User extends Authenticatable
         return $this->hasMany(Project::class);
     }
 
+    /** @return HasMany<CourseTask, $this> */
+    public function courseTasks(): HasMany
+    {
+        return $this->hasMany(CourseTask::class);
+    }
+
     public function hasRole(string ...$roles): bool
     {
         return in_array($this->role, $roles, true);
+    }
+
+    public function academicIdentifierField(): string
+    {
+        return $this->hasRole(self::ROLE_DOSEN) ? 'nip' : 'nrp';
     }
 }

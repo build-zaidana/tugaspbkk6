@@ -59,5 +59,7 @@ class DatabaseSeeder extends Seeder
             ->count(15)
             ->has(Project::factory()->count(2))
             ->create();
+
+        $this->call(PortfolioSeeder::class);
     }
 }

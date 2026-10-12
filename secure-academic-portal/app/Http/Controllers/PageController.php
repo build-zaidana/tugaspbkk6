@@ -2,31 +2,43 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
 class PageController extends Controller
 {
-    public function index()
+    public function index(Request $request): View
     {
-        $nama = 'Adrian Afzal Zaidana';
-        $nrp = '5025241151';
+        $portfolio = $this->portfolio($request);
 
-        return view('home', compact('nama', 'nrp'));
+        return view('home', [
+            'portfolio' => $portfolio,
+            'courseTasks' => $portfolio?->courseTasks()->orderByDesc('tanggal_pengumpulan')->latest()->get() ?? collect(),
+        ]);
     }
 
-    public function about()
+    public function about(Request $request): View
     {
-        $profile_dept = 'Lorem ipsum....';
-
-        return view('about', compact('profile_dept'));
+        return view('about', ['portfolio' => $this->portfolio($request)]);
     }
 
-    public function project()
+    public function project(Request $request): View
     {
-        $project_plan = 'lorem ipsum ....';
+        $portfolio = $this->portfolio($request);
 
-        return view('project', compact('project_plan'));
+        return view('project', [
+            'portfolio' => $portfolio,
+            'projects' => $portfolio?->projects()->latest()->get() ?? collect(),
+        ]);
     }
 
-    public function hitung(int $angka1, int $angka2, string $operasi)
+    private function portfolio(Request $request): ?User
+    {
+        return $request->user() ?? User::where('email', config('portfolio.public_email'))->first();
+    }
+
+    public function hitung(int $angka1, int $angka2, string $operasi): View
     {
         switch ($operasi) {
             case 'tambah':

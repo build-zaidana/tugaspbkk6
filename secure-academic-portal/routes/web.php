@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CourseTaskController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
@@ -22,6 +23,8 @@ Route::get('/hitung/{angka1}/{angka2}/{operasi}', [PageController::class, 'hitun
 */
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::post('/course-tasks', [CourseTaskController::class, 'store'])->name('course-tasks.store');
+    Route::delete('/course-tasks/{courseTask}', [CourseTaskController::class, 'destroy'])->name('course-tasks.destroy');
 
     Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
     Route::post('/projects', [ProjectController::class, 'store'])

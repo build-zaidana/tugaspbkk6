@@ -1,4 +1,9 @@
 <x-guest-layout>
+    <div class="lab-login-intro">
+        <span class="lab-eyebrow">Akses portal</span>
+        <h2>Selamat datang kembali.</h2>
+        <p>Masuk untuk melanjutkan perjalanan akademikmu.</p>
+    </div>
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
@@ -51,7 +56,7 @@
             <div class="flex flex-wrap gap-2">
                 @foreach (['dosen' => 'Dosen', 'asdos' => 'Asdos', 'mahasiswa' => 'Mahasiswa'] as $role => $label)
                     <a href="{{ route('login.as', $role) }}"
-                       class="px-3 py-2 text-xs font-semibold uppercase rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200">
+                       class="lab-demo-link">
                         Login sebagai {{ $label }}
                     </a>
                 @endforeach
