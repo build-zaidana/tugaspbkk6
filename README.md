@@ -10,3 +10,7 @@ Source diimpor dari file yang tercatat dalam Git. Dependensi lokal dan kredensia
 - `its-academic-profile/`: dari https://github.com/shfawr/its-academic-profile, branch `main`, commit `a58073212c7d440007edaf9477d68599149995a2`.
 - `5025241204_Tugas1/`: dari source [Fathiya Nayla Husna Wibowo](https://github.com/artificialangel/PBKK-B-5025241204), branch impor, commit `6b35f95`.
 
+
+## Tugas Pertemuan 5 & 6 — Secure Academic Portal
+
+- `secure-academic-portal/`: pengembangan dari `tugas1_5025241151_AdrianAfzalZaidana/` untuk Tugas Pertemuan 5 (Middleware, Autentikasi Breeze, Gate & Policy) dan Pertemuan 6 (Migration, Eloquent, Factory & Seeder). Lihat [`secure-academic-portal/README.md`](secure-academic-portal/README.md) untuk cara setup, akun demo, dan pemetaan spesifikasi tugas.
