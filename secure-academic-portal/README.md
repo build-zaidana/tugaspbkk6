@@ -6,33 +6,88 @@ proposal proyek Agentic AI.
 
 ## Cara Menjalankan
 
-Kebutuhan: PHP 8.3+, Composer, Node.js 20+, dan MySQL. Database aplikasi memakai MySQL sesuai tugas pertemuan 6; SQLite hanya digunakan untuk pengujian otomatis secara default.
+Panduan berikut dapat digunakan untuk menyiapkan dan menjalankan aplikasi di komputer masing-masing. Semua perintah terminal dijalankan dari folder `secure-academic-portal`, yaitu folder yang berisi file `artisan` dan `composer.json`.
 
-```bash
-composer install
-npm install
-npm run build
+### Persiapan
 
-cp .env.example .env
-php artisan key:generate
+Siapkan **PHP 8.3+** (disarankan PHP 8.4), **Composer**, **Node.js 20.19+ pada versi 20 atau 22.12+**, dan **MySQL**. Pastikan perintah `php`, `composer`, `node`, dan `npm` tersedia di terminal, serta ekstensi PHP `pdo_mysql` aktif.
 
-# Buat database MySQL kosong bernama secure_academic_portal (lihat DB_* di .env), lalu:
-php artisan migrate --seed
+Database aplikasi memakai MySQL sesuai tugas pertemuan 6. SQLite hanya digunakan untuk pengujian otomatis secara default.
 
-php artisan serve
-```
+### Setup awal (cukup sekali)
 
-Atur `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD` di `.env` sesuai server MySQL lokal. Nama database bawaan adalah `secure_academic_portal`; buat dengan `CREATE DATABASE secure_academic_portal CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`. Jangan sertakan `.env` dalam Git.
+1. Unduh atau clone repositori, lalu buka folder **`secure-academic-portal`** di VS Code melalui **File → Open Folder**. Buka terminal melalui **Terminal → New Terminal** atau tekan **Ctrl + `**. Pada Windows, gunakan **PowerShell**.
 
-Pada workspace Windows ini, instance MySQL khusus proyek menggunakan port **3307** dan data di `../../.runtime/mysql-pbkk6/data`; konfigurasi aktif tersimpan di `.env`. PHP portable berada di `../../.runtime/php84`. Untuk menyalakan kembali MySQL dan aplikasi, jalankan dari folder proyek:
+2. Instal dependensi dan bangun aset tampilan:
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\start-local.ps1
-```
+   ```powershell
+   composer install
+   npm install
+   npm run build
+   ```
 
-Halaman aplikasi tersedia di `http://localhost:8000`. Pada komputer lain, gunakan server MySQL sendiri dan sesuaikan `.env`, lalu jalankan `php artisan serve`.
+3. Buat konfigurasi aplikasi dari contoh yang tersedia, lalu buat application key:
 
-Reset data demo kapan saja: `php artisan migrate:fresh --seed`. Jalankan pengujian: `php artisan test`.
+   ```powershell
+   Copy-Item .env.example .env
+   php artisan key:generate
+   ```
+
+   Pada Linux atau macOS, gunakan `cp .env.example .env` sebagai pengganti `Copy-Item`.
+
+4. Nyalakan layanan **MySQL** pada komputer tersebut. Jika menggunakan XAMPP, buka **XAMPP Control Panel**, lalu klik **Start** pada **MySQL**.
+
+5. Buat database melalui phpMyAdmin atau klien MySQL. Jalankan SQL berikut di menu atau klien SQL:
+
+   ```sql
+   CREATE DATABASE secure_academic_portal
+   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   ```
+
+6. Buka file `.env` dan sesuaikan koneksi dengan MySQL yang digunakan. Contoh untuk MySQL lokal dengan pengguna `root` tanpa password:
+
+   ```dotenv
+   APP_ENV=local
+   APP_URL=http://localhost:8000
+
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=secure_academic_portal
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
+
+   Sesuaikan `DB_PORT`, `DB_USERNAME`, dan `DB_PASSWORD` jika pengaturan MySQL berbeda. Simpan file `.env` dan jangan sertakan file tersebut dalam Git.
+
+7. Buat tabel dan isi data demo:
+
+   ```powershell
+   php artisan config:clear
+   php artisan migrate --seed
+   ```
+
+8. Jalankan aplikasi dengan langkah pada bagian berikut.
+
+### Menyalakan aplikasi setelah setup
+
+1. Nyalakan **MySQL**.
+
+2. Buka terminal di folder **`secure-academic-portal`**, lalu jalankan:
+
+   ```powershell
+   php artisan serve --host=127.0.0.1 --port=8000
+   ```
+
+3. Tunggu hingga terminal menampilkan `Server running on [http://127.0.0.1:8000]`. Biarkan terminal tetap terbuka selama aplikasi digunakan.
+
+4. Buka **[http://localhost:8000](http://localhost:8000)** di browser pada komputer yang menjalankan aplikasi. Untuk masuk, buka **[halaman login](http://localhost:8000/login)** dan gunakan akun pada bagian **Akun Demo** di bawah.
+
+Setelah komputer dinyalakan ulang, cukup ulangi langkah pada bagian **Menyalakan aplikasi setelah setup**. Untuk menghentikan server aplikasi, tekan **Ctrl + C** pada terminal tersebut.
+
+### Data demo dan pengujian
+
+Untuk menghapus seluruh data aplikasi dan membuat ulang data demo, jalankan `php artisan migrate:fresh --seed`. Jalankan pengujian dengan `php artisan test`.
 
 Profil (`nrp`, `nip`, `department`, `bio`), proposal, dan riwayat tugas sekarang disimpan di database. Dosen memakai NIP, sedangkan mahasiswa dan asdos memakai NRP; kedua nomor disimpan pada kolom terpisah dan unik. Profil dapat disunting melalui `/profile`; riwayat tugas dapat ditambah dan dihapus melalui `/dashboard`. Halaman publik menampilkan akun `PORTFOLIO_PUBLIC_EMAIL` (bawaan `mahasiswa@student.its.ac.id`); pengguna yang login melihat portofolionya sendiri. API key tidak ditampilkan pada halaman publik.
 
