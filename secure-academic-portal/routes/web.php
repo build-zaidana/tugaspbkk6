@@ -1,8 +1,11 @@
 <?php
 
-use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\MahasiswaController;
+use App\Http\Controllers\Admin\ProposalController;
+use App\Http\Controllers\Admin\UserRoleController;
 use App\Http\Controllers\CourseTaskController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
@@ -42,15 +45,27 @@ Route::middleware('auth')->group(function () {
 });
 
 /*
-| 3. Area Dosen / Asisten Dosen (hanya role tertentu)
+| 3. Panel Admin AdminLTE (Pertemuan 10) — hanya peran Spatie admin & staf.
+|    Izin per aksi (lihat-data, kelola-nilai, hapus-data, kelola-pengguna)
+|    dikunci lagi di masing-masing controller lewat middleware permission:.
 */
-Route::middleware(['auth', 'cek.peran:dosen,asdos'])
+Route::middleware(['auth', 'role:admin|staf'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('/', [AdminController::class, 'index'])->name('index');
-        Route::get('/projects/{project}/nilai', [AdminController::class, 'editNilai'])->name('nilai.edit');
-        Route::put('/projects/{project}/nilai', [AdminController::class, 'updateNilai'])->name('nilai.update');
+        Route::get('/', fn () => redirect()->route('admin.dashboard'))->name('index');
+        Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
+
+        Route::get('/mahasiswa', [MahasiswaController::class, 'index'])->name('mahasiswa.index');
+        Route::delete('/mahasiswa/{mahasiswa}', [MahasiswaController::class, 'destroy'])->name('mahasiswa.destroy');
+
+        Route::get('/proposals', [ProposalController::class, 'index'])->name('proposals.index');
+        Route::get('/proposals/{project}/nilai', [ProposalController::class, 'editNilai'])->name('proposals.nilai.edit');
+        Route::put('/proposals/{project}/nilai', [ProposalController::class, 'updateNilai'])->name('proposals.nilai.update');
+        Route::delete('/proposals/{project}', [ProposalController::class, 'destroy'])->name('proposals.destroy');
+
+        Route::get('/users', [UserRoleController::class, 'index'])->name('users.index');
+        Route::put('/users/{user}/role', [UserRoleController::class, 'update'])->name('users.role.update');
     });
 
 /*
@@ -58,7 +73,7 @@ Route::middleware(['auth', 'cek.peran:dosen,asdos'])
 */
 if (app()->environment('local')) {
     Route::get('/login/as/{role}', function (string $role) {
-        $user = User::where('role', $role)->orderBy('id')->first();
+        $user = User::role($role)->orderBy('id')->first();
 
         if (! $user) {
             return redirect()->route('login')->with('status', 'Akun uji coba tidak ditemukan!');
@@ -67,9 +82,9 @@ if (app()->environment('local')) {
         Auth::login($user);
         request()->session()->regenerate();
 
-        return redirect()->route('dashboard');
+        return redirect()->route($user->homeRouteName());
     })->middleware('guest')
-        ->whereIn('role', [User::ROLE_DOSEN, User::ROLE_ASDOS, User::ROLE_MAHASISWA])
+        ->whereIn('role', array_keys(User::ROLE_LABELS))
         ->name('login.as');
 }
 

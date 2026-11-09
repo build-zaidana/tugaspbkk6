@@ -103,8 +103,8 @@ class CourseTaskTest extends TestCase
     #[DataProvider('roles')]
     public function test_delete_policy_checks_ownership_for_every_role(string $role): void
     {
-        $owner = User::factory()->create(['role' => $role]);
-        $other = User::factory()->create(['role' => $role]);
+        $owner = User::factory()->withRole($role)->create();
+        $other = User::factory()->withRole($role)->create();
         $task = CourseTask::factory()->for($owner)->create();
 
         $this->assertTrue(Gate::forUser($owner)->allows('delete', $task));
@@ -113,7 +113,7 @@ class CourseTaskTest extends TestCase
 
     public static function roles(): array
     {
-        return ['mahasiswa' => ['mahasiswa'], 'asdos' => ['asdos'], 'dosen' => ['dosen']];
+        return ['mahasiswa' => ['mahasiswa'], 'staf' => ['staf'], 'admin' => ['admin']];
     }
 
     public function test_deleting_user_removes_their_task_history(): void

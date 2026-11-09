@@ -18,8 +18,13 @@
                     <x-nav-link :href="route('projects.create')" :active="request()->routeIs('projects.*')">
                         Ajukan Proposal
                     </x-nav-link>
+                    @if (Auth::user()->canAccessAdminPanel())
+                        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
+                            Panel Admin
+                        </x-nav-link>
+                    @endif
                     @can('kelola-nilai')
-                        <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
+                        <x-nav-link :href="route('admin.proposals.index')" :active="false">
                             Input Nilai
                         </x-nav-link>
                     @endcan
@@ -31,7 +36,7 @@
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button :aria-expanded="open" aria-label="Menu akun" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }} ({{ Auth::user()->role }})</div>
+                            <div>{{ Auth::user()->name }} ({{ Auth::user()->roleName() }})</div>
 
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -81,8 +86,13 @@
             <x-responsive-nav-link :href="route('projects.create')" :active="request()->routeIs('projects.*')">
                 Ajukan Proposal
             </x-responsive-nav-link>
+            @if (Auth::user()->canAccessAdminPanel())
+                <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
+                    Panel Admin
+                </x-responsive-nav-link>
+            @endif
             @can('kelola-nilai')
-                <x-responsive-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
+                <x-responsive-nav-link :href="route('admin.proposals.index')" :active="false">
                     Input Nilai
                 </x-responsive-nav-link>
             @endcan

@@ -28,7 +28,8 @@ class SecurePortalTest extends TestCase
             'role' => 'dosen',
         ])->assertRedirect(route('dashboard'));
 
-        $this->assertSame('mahasiswa', User::where('email', 'budi@student.its.ac.id')->value('role'));
+        $budi = User::where('email', 'budi@student.its.ac.id')->firstOrFail();
+        $this->assertSame(['mahasiswa'], $budi->getRoleNames()->all());
     }
 
     public function test_guest_is_redirected_from_dashboard_and_admin(): void
@@ -46,10 +47,11 @@ class SecurePortalTest extends TestCase
             ->assertSee('Izin akses ditolak');
     }
 
-    public function test_dosen_and_asdos_can_open_admin_area(): void
+    public function test_admin_and_staf_can_open_admin_area(): void
     {
-        $this->actingAs(User::factory()->dosen()->create())->get('/admin')->assertOk();
-        $this->actingAs(User::factory()->asdos()->create())->get('/admin')->assertOk();
+        $this->actingAs(User::factory()->admin()->create())->get('/admin')->assertRedirect(route('admin.dashboard'));
+        $this->actingAs(User::factory()->admin()->create())->get('/admin/dashboard')->assertOk();
+        $this->actingAs(User::factory()->staf()->create())->get('/admin/dashboard')->assertOk();
     }
 
     public function test_dashboard_only_lists_own_projects(): void
@@ -69,7 +71,7 @@ class SecurePortalTest extends TestCase
         $this->actingAs(User::factory()->create())->get('/dashboard')
             ->assertDontSee('Input Nilai');
 
-        $this->actingAs(User::factory()->dosen()->create())->get('/dashboard')
+        $this->actingAs(User::factory()->admin()->create())->get('/dashboard')
             ->assertSee('Input Nilai');
     }
 
@@ -99,7 +101,7 @@ class SecurePortalTest extends TestCase
             ->put(route('projects.update', $project), ['judul' => 'Dibajak'])
             ->assertForbidden();
 
-        $this->actingAs(User::factory()->dosen()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get(route('projects.edit', $project))
             ->assertForbidden();
 
@@ -110,17 +112,17 @@ class SecurePortalTest extends TestCase
         $this->assertSame('Judul Baru', $project->fresh()->judul);
     }
 
-    public function test_only_dosen_or_asdos_can_input_nilai(): void
+    public function test_only_admin_or_staf_can_input_nilai(): void
     {
         $project = Project::factory()->create();
 
         $this->actingAs(User::factory()->create())
-            ->put(route('admin.nilai.update', $project), ['nilai' => 90])
+            ->put(route('admin.proposals.nilai.update', $project), ['nilai' => 90])
             ->assertForbidden();
 
-        $this->actingAs(User::factory()->asdos()->create())
-            ->put(route('admin.nilai.update', $project), ['nilai' => 87.5, 'catatan_review' => 'Bagus'])
-            ->assertRedirect(route('admin.index'));
+        $this->actingAs(User::factory()->staf()->create())
+            ->put(route('admin.proposals.nilai.update', $project), ['nilai' => 87.5, 'catatan_review' => 'Bagus'])
+            ->assertRedirect(route('admin.proposals.index'));
 
         $this->assertEquals(87.5, $project->fresh()->nilai);
     }

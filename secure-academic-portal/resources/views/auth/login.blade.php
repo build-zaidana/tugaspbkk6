@@ -54,7 +54,7 @@
         <div class="mt-6 border-t pt-4">
             <p class="text-xs text-gray-500 mb-2">Login instan akun demo (mode local):</p>
             <div class="flex flex-wrap gap-2">
-                @foreach (['dosen' => 'Dosen', 'asdos' => 'Asdos', 'mahasiswa' => 'Mahasiswa'] as $role => $label)
+                @foreach (\App\Models\User::ROLE_LABELS as $role => $label)
                     <a href="{{ route('login.as', $role) }}"
                        class="lab-demo-link">
                         Login sebagai {{ $label }}

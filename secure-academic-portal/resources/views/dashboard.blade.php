@@ -20,7 +20,7 @@
             @endif
 
             <section class="lab-hero" aria-labelledby="welcome-title">
-                <span class="lab-eyebrow">Ruang akademik / {{ $user->role }}</span>
+                <span class="lab-eyebrow">Ruang akademik / {{ $user->roleName() }}</span>
                 <h1 id="welcome-title">Halo, {{ $user->name }}.</h1>
                 <p class="mb-0">Setiap tugas adalah langkah baru. Simpan perjalanan belajarmu dan kembangkan ide Agentic AI berikutnya.</p>
             </section>
@@ -38,19 +38,19 @@
                     <div><dt class="text-gray-500">{{ strtoupper($user->academicIdentifierField()) }}</dt><dd class="font-medium">{{ $user->{$user->academicIdentifierField()} ?? 'Belum diisi' }}</dd></div>
                     <div><dt class="text-gray-500">Departemen</dt><dd class="font-medium">{{ $user->department }}</dd></div>
                     <div><dt class="text-gray-500">Email</dt><dd class="font-medium">{{ $user->email }}</dd></div>
-                    <div><dt class="text-gray-500">Peran</dt><dd class="font-medium capitalize">{{ $user->role }}</dd></div>
+                    <div><dt class="text-gray-500">Peran</dt><dd class="font-medium">{{ $user->roleLabel() }}</dd></div>
                 </dl>
                 @if ($user->bio)
                     <p class="mt-4 text-sm text-gray-700">{{ $user->bio }}</p>
                 @endif
                 <a href="{{ route('profile.edit') }}" class="mt-4 inline-block text-sm font-semibold text-indigo-600 hover:text-indigo-800">Edit profil</a>
 
-                @can('kelola-nilai')
-                    <a href="{{ route('admin.index') }}"
+                @if ($user->canAccessAdminPanel())
+                    <a href="{{ route('admin.dashboard') }}"
                        class="mt-4 inline-block text-sm font-semibold text-indigo-600 hover:text-indigo-800">
-                        Buka panel input nilai proposal &rarr;
+                        Buka Panel Admin (AdminLTE) &rarr;
                     </a>
-                @endcan
+                @endif
             </div>
 
             @include('course-task-history')

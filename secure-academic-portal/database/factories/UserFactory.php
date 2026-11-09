@@ -13,6 +13,20 @@ use Illuminate\Support\Str;
 class UserFactory extends Factory
 {
     /**
+     * Departemen FTEIC ITS beserta kode NRP-nya.
+     *
+     * @var array<string, string>
+     */
+    public const DEPARTMENTS = [
+        'Teknik Elektro' => '5022',
+        'Teknik Biomedik' => '5023',
+        'Teknik Komputer' => '5024',
+        'Teknik Informatika' => '5025',
+        'Sistem Informasi' => '5026',
+        'Teknologi Informasi' => '5027',
+    ];
+
+    /**
      * The current password being used by the factory.
      */
     protected static ?string $password;
@@ -27,21 +41,53 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->userName().'@student.its.ac.id',
-            'role' => User::ROLE_MAHASISWA,
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
     }
 
-    public function dosen(): static
+    /**
+     * Pengguna tanpa peran eksplisit otomatis menjadi mahasiswa.
+     */
+    public function configure(): static
     {
-        return $this->state(fn (array $attributes) => ['role' => User::ROLE_DOSEN]);
+        return $this->afterCreating(function (User $user): void {
+            if ($user->roles()->doesntExist()) {
+                $user->assignRole(User::ROLE_MAHASISWA);
+            }
+        });
     }
 
-    public function asdos(): static
+    public function withRole(string $role): static
     {
-        return $this->state(fn (array $attributes) => ['role' => User::ROLE_ASDOS]);
+        return $this->afterCreating(fn (User $user) => $user->syncRoles([$role]));
+    }
+
+    public function admin(): static
+    {
+        return $this->withRole(User::ROLE_ADMIN);
+    }
+
+    public function staf(): static
+    {
+        return $this->withRole(User::ROLE_STAF);
+    }
+
+    /**
+     * Departemen FTEIC acak dengan NRP yang sesuai, misalnya 5026231042.
+     */
+    public function withAcademicIdentity(): static
+    {
+        return $this->state(function (array $attributes): array {
+            $department = fake()->randomElement(array_keys(self::DEPARTMENTS));
+            $angkatan = fake()->randomElement(['21', '22', '23']);
+
+            return [
+                'department' => $department,
+                'nrp' => fake()->unique()->numerify(self::DEPARTMENTS[$department].$angkatan.'1###'),
+            ];
+        });
     }
 
     /**

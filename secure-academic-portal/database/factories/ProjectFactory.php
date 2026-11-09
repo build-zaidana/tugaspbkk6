@@ -44,4 +44,19 @@ class ProjectFactory extends Factory
             'created_at' => fake()->dateTimeBetween('-2 months'),
         ];
     }
+
+    /**
+     * Proposal yang sudah dinilai dosen / asisten dosen.
+     */
+    public function dinilai(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'nilai' => fake()->randomFloat(2, 65, 98),
+            'catatan_review' => fake()->randomElement([
+                'Ruang lingkup agent sudah jelas, lengkapi skenario pengujian.',
+                'Tambahkan mitigasi keamanan untuk pemanggilan tool eksternal.',
+                'Ide relevan, perjelas metrik keberhasilan agent.',
+            ]),
+        ]);
+    }
 }

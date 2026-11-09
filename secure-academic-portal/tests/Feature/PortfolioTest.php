@@ -87,8 +87,9 @@ class PortfolioTest extends TestCase
 
         $this->assertDatabaseHas('users', [
             'id' => $user->id, 'nrp' => '5025241999',
-            'bio' => 'Profil yang diperbarui.', 'role' => 'mahasiswa',
+            'bio' => 'Profil yang diperbarui.',
         ]);
+        $this->assertSame(['mahasiswa'], $user->fresh()->getRoleNames()->all());
     }
 
     public function test_duplicate_nrp_is_rejected_without_modifying_profile(): void
@@ -106,7 +107,7 @@ class PortfolioTest extends TestCase
     #[DataProvider('academicIdentifiers')]
     public function test_profile_form_shows_only_identifier_for_current_role(string $role, string $field, string $otherField): void
     {
-        $user = User::factory()->create(['role' => $role]);
+        $user = User::factory()->withRole($role)->create();
 
         $this->actingAs($user)->get('/profile')->assertOk()
             ->assertSee('for="'.$field.'"', false)
@@ -117,7 +118,7 @@ class PortfolioTest extends TestCase
     #[DataProvider('academicIdentifiers')]
     public function test_academic_identifier_is_saved_for_current_role(string $role, string $field, string $otherField): void
     {
-        $user = User::factory()->create(['role' => $role]);
+        $user = User::factory()->withRole($role)->create();
 
         $this->actingAs($user)->patch('/profile', [
             'name' => $user->name, 'email' => $user->email, $field => '198001012005011001',
@@ -131,7 +132,7 @@ class PortfolioTest extends TestCase
     #[DataProvider('academicIdentifiers')]
     public function test_identifier_for_another_role_cannot_be_submitted(string $role, string $field, string $otherField): void
     {
-        $user = User::factory()->create(['role' => $role]);
+        $user = User::factory()->withRole($role)->create();
 
         $this->actingAs($user)->patch('/profile', [
             'name' => $user->name, 'email' => $user->email, $otherField => '198001012005011001',
@@ -143,7 +144,7 @@ class PortfolioTest extends TestCase
     #[DataProvider('identifierPages')]
     public function test_portfolio_pages_display_identifier_matching_role(string $role, string $field, string $path): void
     {
-        $user = User::factory()->create(['role' => $role, $field => '198001012005011001']);
+        $user = User::factory()->withRole($role)->create([$field => '198001012005011001']);
 
         $this->actingAs($user)->get($path)->assertOk()
             ->assertSee(strtoupper($field))
@@ -154,28 +155,28 @@ class PortfolioTest extends TestCase
     public static function academicIdentifiers(): array
     {
         return [
-            'dosen memakai NIP' => ['dosen', 'nip', 'nrp'],
+            'admin (dosen) memakai NIP' => ['admin', 'nip', 'nrp'],
             'mahasiswa memakai NRP' => ['mahasiswa', 'nrp', 'nip'],
-            'asdos memakai NRP' => ['asdos', 'nrp', 'nip'],
+            'staf (asdos) memakai NRP' => ['staf', 'nrp', 'nip'],
         ];
     }
 
     public static function identifierPages(): array
     {
         return [
-            'home dosen' => ['dosen', 'nip', '/'],
-            'dashboard dosen' => ['dosen', 'nip', '/dashboard'],
+            'home admin' => ['admin', 'nip', '/'],
+            'dashboard admin' => ['admin', 'nip', '/dashboard'],
             'home mahasiswa' => ['mahasiswa', 'nrp', '/'],
             'dashboard mahasiswa' => ['mahasiswa', 'nrp', '/dashboard'],
-            'home asdos' => ['asdos', 'nrp', '/'],
-            'dashboard asdos' => ['asdos', 'nrp', '/dashboard'],
+            'home staf' => ['staf', 'nrp', '/'],
+            'dashboard staf' => ['staf', 'nrp', '/dashboard'],
         ];
     }
 
     public function test_duplicate_nip_is_rejected_without_modifying_profile(): void
     {
-        User::factory()->dosen()->create(['nip' => '198001012005011001']);
-        $user = User::factory()->dosen()->create();
+        User::factory()->admin()->create(['nip' => '198001012005011001']);
+        $user = User::factory()->admin()->create();
 
         $this->actingAs($user)->patch('/profile', [
             'name' => $user->name, 'email' => $user->email, 'nip' => '198001012005011001',
@@ -191,7 +192,7 @@ class PortfolioTest extends TestCase
         $this->assertSame(18, User::count());
         $this->assertSame(34, Project::count());
         $this->assertSame(54, \App\Models\CourseTask::count());
-        $students = User::where('role', 'mahasiswa')->where('email', '!=', 'mahasiswa@student.its.ac.id')->get();
+        $students = User::role('mahasiswa')->where('email', '!=', 'mahasiswa@student.its.ac.id')->get();
         $this->assertCount(15, $students);
         foreach ($students as $student) {
             $this->assertSame(2, $student->projects()->count());

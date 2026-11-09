@@ -2,10 +2,8 @@
 
 namespace App\Providers;
 
-use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,10 +22,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Gate global: hanya dosen & asdos yang boleh mengisi nilai proposal.
-        Gate::define('kelola-nilai', function (User $user): bool {
-            return $user->hasRole(User::ROLE_DOSEN, User::ROLE_ASDOS);
-        });
+        // Izin seperti 'kelola-nilai' dan 'hapus-data' kini berasal dari tabel
+        // Spatie (lihat RoleAndPermissionSeeder) dan otomatis terdaftar di Gate,
+        // sehingga @can, Gate::authorize, dan middleware permission: tetap bekerja.
 
         // Tantangan A+: maksimal 3 kali submit proposal per menit per user.
         RateLimiter::for('submit-proposal', function (Request $request) {
